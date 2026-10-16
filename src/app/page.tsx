@@ -39,6 +39,7 @@ import BombArena from "@/components/arenas/BombArena";
 import ControlDock from "@/components/ControlDock";
 import VerdictModal from "@/components/VerdictModal";
 import LeaderboardModal from "@/components/LeaderboardModal";
+import { trackEvent } from "@/lib/analytics";
 
 export default function HomePage() {
   const [mode, setMode] = useState<ArenaMode>("lightning");
@@ -79,6 +80,16 @@ export default function HomePage() {
     setKarmaStats(getKarmaLeaderboard());
     setHistoryLog(getHistoryLog());
     setVolume(soundEngine.getVolume());
+
+    // Fetch shared live global counter
+    fetch("/api/counter")
+      .then((res) => res.json())
+      .then((data) => {
+        if (typeof data?.count === "number" && data.count > 0) {
+          setGlobalCount(data.count);
+        }
+      })
+      .catch(() => {});
 
     const currentHour = new Date().getHours();
     const autoKeo = getAutoKeoByHour(currentHour);
@@ -155,6 +166,10 @@ export default function HomePage() {
     }
     window.history.replaceState({}, "", url.toString());
     navigator.clipboard?.writeText(url.toString()).catch(() => {});
+    trackEvent("share_room_link", {
+      keo: displayKeoTitle,
+      squadSize: players.length,
+    });
   };
 
   const handleSaveCurrentSquad = (name: string) => {
@@ -196,6 +211,13 @@ export default function HomePage() {
           rarity
         )
       : undefined;
+
+    trackEvent("spin_tribulation", {
+      mode,
+      keo: displayKeoTitle,
+      squadSize: players.length,
+      billSplit: enableBillSplit,
+    });
 
     setPendingOutcome({
       victim,
@@ -242,7 +264,19 @@ export default function HomePage() {
       victimBillPaid,
     });
 
-    setGlobalCount(incrementGlobalSpinCount());
+    // Increment shared global counter API
+    setGlobalCount((prev) => prev + 1);
+    incrementGlobalSpinCount();
+
+    fetch("/api/counter", { method: "POST" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (typeof data?.count === "number" && data.count > 0) {
+          setGlobalCount(data.count);
+        }
+      })
+      .catch(() => {});
+
     setLastVictim(pendingOutcome.victim);
     setKarmaStats(getKarmaLeaderboard());
     setHistoryLog(getHistoryLog());

@@ -8,6 +8,8 @@
     "start": "COPYFILE_DISABLE=1 next start"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "canvas-confetti": "^1.9.3",
     "lucide-react": "^0.475.0",
     "next": "^15.2.0",

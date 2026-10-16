@@ -12,6 +12,7 @@ import {
 import { VIETQR_BANKS } from "@/data/presets";
 import { TribulationOutcome } from "@/lib/rng";
 import { getSavedBankConfig, saveBankConfig } from "@/lib/storage";
+import { trackEvent } from "@/lib/analytics";
 import ChibiAvatar from "@/components/ChibiAvatar";
 
 interface VerdictModalProps {
@@ -103,6 +104,11 @@ export default function VerdictModal({
     try {
       await navigator.clipboard.writeText(buildShareText());
       setCopiedText(true);
+      trackEvent("copy_zalo_verdict", {
+        keo: keoTitle,
+        rarity: rarity.badge,
+        victim,
+      });
       setTimeout(() => setCopiedText(false), 2500);
     } catch {
       // ignore
@@ -254,6 +260,11 @@ export default function VerdictModal({
     a.href = dataUrl;
     a.download = `so-do-kiep-${victim.toLowerCase().replace(/\s+/g, "-")}.png`;
     a.click();
+    trackEvent("download_poster_png", {
+      keo: keoTitle,
+      rarity: rarity.badge,
+      victim,
+    });
   };
 
   const primaryVictimShare =

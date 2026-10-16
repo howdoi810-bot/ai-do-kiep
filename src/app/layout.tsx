@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro, JetBrains_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 const beVietnam = Be_Vietnam_Pro({
@@ -45,6 +47,8 @@ export default function RootLayout({
     >
       <body className="min-h-screen bg-[#070a12] text-slate-100 antialiased selection:bg-amber-400 selection:text-slate-950">
         {children}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
